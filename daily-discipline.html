@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Discipline — Rise & Reign</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8CB7A;
+    --gold-dim: #7a6330;
+    --ink: #0D0D0D;
+    --deep: #111118;
+    --surface: #16161F;
+    --card: #1C1C28;
+    --card2: #202030;
+    --text: #EDE8DC;
+    --muted: #8A8478;
+    --accent: #4C6E9E;
+    --green: #4CAF7D;
+    --border: rgba(201,168,76,0.18);
+  }
+
+  body {
+    background: var(--deep);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Starfield background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(76,110,158,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(13,13,13,0) 0%, rgba(13,13,13,0.6) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .noise {
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .crown {
+    font-size: 28px;
+    letter-spacing: 12px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 6vw, 52px);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    color: var(--gold-light);
+    line-height: 1.1;
+    text-shadow: 0 0 60px rgba(201,168,76,0.3);
+  }
+
+  .subtitle {
+    margin-top: 10px;
+    font-size: 17px;
+    font-style: italic;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 20px auto;
+    max-width: 360px;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-gem { color: var(--gold); font-size: 14px; }
+
+  /* Live clock */
+  .clock-bar {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 40px;
+    animation: fadeDown 0.9s ease 0.1s both;
+  }
+
+  .clock-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 28px;
+    text-align: center;
+  }
+
+  #live-time {
+    font-family: 'Cinzel', serif;
+    font-size: 30px;
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+  }
+
+  #live-date {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  .phase-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05));
+    border: 1px solid var(--gold-dim);
+    border-radius: 30px;
+    padding: 8px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+  }
+
+  /* Section */
+  .phase-section {
+    margin-bottom: 36px;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .phase-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .phase-icon.dawn    { background: radial-gradient(circle, rgba(201,168,76,0.25), rgba(201,168,76,0.05)); border: 1px solid rgba(201,168,76,0.3); }
+  .phase-icon.soul    { background: radial-gradient(circle, rgba(76,110,158,0.25), rgba(76,110,158,0.05)); border: 1px solid rgba(76,110,158,0.3); }
+  .phase-icon.work    { background: radial-gradient(circle, rgba(76,175,125,0.25), rgba(76,175,125,0.05)); border: 1px solid rgba(76,175,125,0.3); }
+  .phase-icon.mid     { background: radial-gradient(circle, rgba(201,168,76,0.2), rgba(201,168,76,0.03)); border: 1px solid rgba(201,168,76,0.2); }
+  .phase-icon.return  { background: radial-gradient(circle, rgba(76,110,158,0.2), rgba(76,110,158,0.03)); border: 1px solid rgba(76,110,158,0.2); }
+
+  .phase-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .phase-time-range {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  /* Task cards */
+  .tasks { display: flex; flex-direction: column; gap: 10px; }
+
+  .task {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .task::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gold-dim);
+    transition: background 0.3s ease;
+  }
+
+  .task:hover { background: var(--card2); transform: translateX(3px); }
+  .task.done { opacity: 0.55; }
+  .task.done::before { background: var(--green); }
+  .task.done .task-name { text-decoration: line-through; color: var(--muted); }
+
+  .task-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--gold-dim);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    color: transparent;
+  }
+
+  .task.done .task-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  .task-body { flex: 1; }
+
+  .task-time {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--gold-dim);
+    margin-bottom: 3px;
+  }
+
+  .task-name {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .task-desc {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  .task-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+    font-family: 'Cinzel', serif;
+  }
+  .tag-spirit { background: rgba(76,110,158,0.15); color: #7AA4D4; border: 1px solid rgba(76,110,158,0.2); }
+  .tag-body   { background: rgba(201,168,76,0.1);  color: var(--gold);  border: 1px solid rgba(201,168,76,0.15); }
+  .tag-mind   { background: rgba(76,175,125,0.1);  color: #72D4A0;  border: 1px solid rgba(76,175,125,0.15); }
+  .tag-biz    { background: rgba(160,100,200,0.1); color: #C89AE8;  border: 1px solid rgba(160,100,200,0.15); }
+
+  /* Progress bar */
+  .progress-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 36px;
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .progress-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+  }
+
+  #progress-pct {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    color: var(--gold-light);
+  }
+
+  .bar-track {
+    height: 8px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  #bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold-light));
+    border-radius: 10px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .mantra {
+    text-align: center;
+    margin-top: 14px;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* Rules banner */
+  .rules {
+    background: linear-gradient(135deg, rgba(201,168,76,0.07), rgba(76,110,158,0.07));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 36px;
+    animation: fadeUp 0.7s ease 0.15s both;
+  }
+
+  .rules-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media (max-width: 500px) { .rules-grid { grid-template-columns: 1fr; } }
+
+  .rule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .rule-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+
+  /* Reset button */
+  .btn-reset {
+    display: block;
+    margin: 0 auto 16px;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--muted);
+    padding: 10px 28px;
+    border-radius: 30px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-reset:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .phase-section:nth-child(1) { animation-delay: 0.1s; }
+  .phase-section:nth-child(2) { animation-delay: 0.2s; }
+  .phase-section:nth-child(3) { animation-delay: 0.3s; }
+  .phase-section:nth-child(4) { animation-delay: 0.4s; }
+  .phase-section:nth-child(5) { animation-delay: 0.5s; }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="wrapper">
+
+  <!-- Header -->
+  <header>
+    <div class="crown">✦ ✦ ✦</div>
+    <h1>RISE & REIGN</h1>
+    <p class="subtitle">Your daily discipline — from 4 AM to 9 PM</p>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-gem">◆</div>
+      <div class="divider-line"></div>
+    </div>
+  </header>
+
+  <!-- Clock -->
+  <div class="clock-bar">
+    <div class="clock-card">
+      <div id="live-time">00:00:00</div>
+      <div id="live-date">Loading...</div>
+    </div>
+    <div style="display:flex;align-items:center;">
+      <div class="phase-badge" id="current-phase">Loading phase...</div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-section">
+    <div class="progress-label">
+      <span class="progress-title">TODAY'S DISCIPLINE</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="bar-track"><div id="bar-fill"></div></div>
+    <div class="mantra" id="mantra-text">"Discipline is the bridge between goals and accomplishment."</div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase-section">
+    <div class="phase-header">
+      <div class="phase-icon dawn">🌑</div>
+      <div>
+        <div class="phase-title">Phase I — The Sacred Hour</div>
+        <div class="phase-time-range">4:00 AM – 5:30 AM</div>
+      </div>
+    </div>
+    <div class="tasks">
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">4:00 AM</div>
+          <div class="task-name">Rise without snooze</div>
+          <div class="task-desc">Your first discipline of the day. No phone. Sit up, feet on floor.</div>
+          <span class="task-tag tag-mind">MIND</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">4:05 AM</div>
+          <div class="task-name">Drink water — 500ml</div>
+          <div class="task-desc">Rehydrate and wake your body before anything else.</div>
+          <span class="task-tag tag-body">BODY</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">4:10 AM</div>
+          <div class="task-name">Breathwork — Box Breathing (10 min)</div>
+          <div class="task-desc">Inhale 4s → Hold 4s → Exhale 4s → Hold 4s. Oxygenate your mind.</div>
+          <span class="task-tag tag-spirit">SPIRIT</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">4:20 AM</div>
+          <div class="task-name">Silent meditation — 20 min</div>
+          <div class="task-desc">No guided audio. Sit in stillness. Observe thoughts without following them.</div>
+          <span class="task-tag tag-spirit">SPIRIT</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">4:40 AM</div>
+          <div class="task-name">Gratitude + Intention journal (10 min)</div>
+          <div class="task-desc">3 gratitudes. 1 intention for the day. 1 thing you will NOT do (no scrolling).</div>
+          <span class="task-tag tag-spirit">SPIRIT</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">4:50 AM</div>
+          <div class="task-name">Read — 30 min (spiritual or business)</div>
+          <div class="task-desc">Physical book only. No screens. Feed your mind before the world does.</div>
+          <span class="task-tag tag-mind">MIND</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase-section">
+    <div class="phase-header">
+      <div class="phase-icon soul">🌅</div>
+      <div>
+        <div class="phase-title">Phase II — Body Activation</div>
+        <div class="phase-time-range">5:30 AM – 7:00 AM</div>
+      </div>
+    </div>
+    <div class="tasks">
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">5:30 AM</div>
+          <div class="task-name">Physical movement — 45 min</div>
+          <div class="task-desc">Walk, run, gym, or yoga. Move your body to move your business.</div>
+          <span class="task-tag tag-body">BODY</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">6:15 AM</div>
+          <div class="task-name">Cold shower or full hygiene reset</div>
+          <div class="task-desc">Cold water activates alertness. Full presence, no autopilot.</div>
+          <span class="task-tag tag-body">BODY</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">6:35 AM</div>
+          <div class="task-name">Nourishing breakfast — no phone</div>
+          <div class="task-desc">Eat in silence or with calm music. No news, no social media, no scrolling.</div>
+          <span class="task-tag tag-body">BODY</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase-section">
+    <div class="phase-header">
+      <div class="phase-icon work">⚡</div>
+      <div>
+        <div class="phase-title">Phase III — Deep Work Block</div>
+        <div class="phase-time-range">7:00 AM – 12:00 PM</div>
+      </div>
+    </div>
+    <div class="tasks">
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">7:00 AM</div>
+          <div class="task-name">Define your top 3 business priorities</div>
+          <div class="task-desc">Write them on paper. These 3 tasks must be done before anything else.</div>
+          <span class="task-tag tag-biz">BUSINESS</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">7:15 AM</div>
+          <div class="task-name">Deep Work Session 1 — 90 min</div>
+          <div class="task-desc">Phone on Do Not Disturb. One task only. No email, no chat. Full focus mode.</div>
+          <span class="task-tag tag-biz">BUSINESS</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">8:45 AM</div>
+          <div class="task-name">Break — 15 min (walk or stretch only)</div>
+          <div class="task-desc">Step outside if possible. No screens. Let your mind breathe.</div>
+          <span class="task-tag tag-body">BODY</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">9:00 AM</div>
+          <div class="task-name">Deep Work Session 2 — 90 min</div>
+          <div class="task-desc">Second priority task. Same rules: one thing, full presence.</div>
+          <span class="task-tag tag-biz">BUSINESS</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">10:30 AM</div>
+          <div class="task-name">Communications window — 30 min</div>
+          <div class="task-desc">Reply to emails and messages. Batched, intentional — not reactive.</div>
+          <span class="task-tag tag-biz">BUSINESS</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">11:00 AM</div>
+          <div class="task-name">Deep Work Session 3 — 60 min</div>
+          <div class="task-desc">Third priority task or creative strategy for the business.</div>
+          <span class="task-tag tag-biz">BUSINESS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase-section">
+    <div class="phase-header">
+      <div class="phase-icon mid">☀️</div>
+      <div>
+        <div class="phase-title">Phase IV — Sustain & Operate</div>
+        <div class="phase-time-range">12:00 PM – 7:00 PM</div>
+      </div>
+    </div>
+    <div class="tasks">
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">12:00 PM</div>
+          <div class="task-name">Mindful lunch — no scrolling</div>
+          <div class="task-desc">Eat away from the desk. Rest your eyes. No social media at the table.</div>
+          <span class="task-tag tag-body">BODY</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">12:30 PM</div>
+          <div class="task-name">Afternoon deep work / meetings</div>
+          <div class="task-desc">Handle meetings, calls, reviews. All scheduled — no drop-in distractions.</div>
+          <span class="task-tag tag-biz">BUSINESS</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">3:00 PM</div>
+          <div class="task-name">Mid-afternoon reset — breathwork 5 min</div>
+          <div class="task-desc">4-7-8 breathing. Inhale 4s, hold 7s, exhale 8s. Reset your state.</div>
+          <span class="task-tag tag-spirit">SPIRIT</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">5:00 PM</div>
+          <div class="task-name">End-of-work review — 15 min</div>
+          <div class="task-desc">What did I complete? What needs tomorrow? Capture, close, release.</div>
+          <span class="task-tag tag-mind">MIND</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">6:00 PM</div>
+          <div class="task-name">Phone in another room — 1 hour before home</div>
+          <div class="task-desc">No mindless scrolling on the commute home. Listen to a podcast or silence.</div>
+          <span class="task-tag tag-mind">MIND</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 5 -->
+  <div class="phase-section">
+    <div class="phase-header">
+      <div class="phase-icon return">🌙</div>
+      <div>
+        <div class="phase-title">Phase V — Return & Restore</div>
+        <div class="phase-time-range">9:00 PM – 10:30 PM</div>
+      </div>
+    </div>
+    <div class="tasks">
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">9:00 PM</div>
+          <div class="task-name">Decompress — light movement or stretching</div>
+          <div class="task-desc">10–15 min of gentle movement. Shake off the day from your body.</div>
+          <span class="task-tag tag-body">BODY</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">9:20 PM</div>
+          <div class="task-name">Nourishing dinner — screen-free</div>
+          <div class="task-desc">Eat slowly. This is recovery time. Your body needs rest, not stimulation.</div>
+          <span class="task-tag tag-body">BODY</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">9:45 PM</div>
+          <div class="task-name">Evening reflection journal — 10 min</div>
+          <div class="task-desc">What went well? What challenged me? What am I becoming? Write freely.</div>
+          <span class="task-tag tag-spirit">SPIRIT</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">10:00 PM</div>
+          <div class="task-name">Phone off / grayscale mode ON</div>
+          <div class="task-desc">Set tomorrow's alarm. Lock the phone away. You don't need it anymore today.</div>
+          <span class="task-tag tag-mind">MIND</span>
+        </div>
+      </div>
+      <div class="task" onclick="toggle(this)">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-time">10:10 PM</div>
+          <div class="task-name">Closing meditation — 10 min</div>
+          <div class="task-desc">Body scan or deep breathing. Let the day dissolve. Sleep is growth.</div>
+          <span class="task-tag tag-spirit">SPIRIT</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules -->
+  <div class="rules">
+    <div class="rules-title">◆ THE SOVEREIGN LAWS ◆</div>
+    <div class="rules-grid">
+      <div class="rule-item"><div class="rule-dot"></div><span>No phone in first 60 mins of waking</span></div>
+      <div class="rule-item"><div class="rule-dot"></div><span>No social media before 12 PM</span></div>
+      <div class="rule-item"><div class="rule-dot"></div><span>Screen time limited to 2 hours/day max</span></div>
+      <div class="rule-item"><div class="rule-dot"></div><span>No doomscrolling in bed — ever</span></div>
+      <div class="rule-item"><div class="rule-dot"></div><span>One task at a time — no multitasking</span></div>
+      <div class="rule-item"><div class="rule-dot"></div><span>Phone face-down during all meals</span></div>
+      <div class="rule-item"><div class="rule-dot"></div><span>Respond, never react — batch your messages</span></div>
+      <div class="rule-item"><div class="rule-dot"></div><span>Every hour of distraction costs you a dream</span></div>
+    </div>
+  </div>
+
+  <button class="btn-reset" onclick="resetAll()">↺ Reset Today's Progress</button>
+
+</div>
+
+<script>
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('live-time').textContent = `${h}:${m}:${s}`;
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('live-date').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+
+    const totalMins = now.getHours() * 60 + now.getMinutes();
+    let phase = '';
+    if (totalMins < 4*60)          phase = '🌑 Pre-Dawn Rest';
+    else if (totalMins < 5*60+30)  phase = '🌑 Sacred Hour';
+    else if (totalMins < 7*60)     phase = '🌅 Body Activation';
+    else if (totalMins < 12*60)    phase = '⚡ Deep Work';
+    else if (totalMins < 21*60)    phase = '☀️ Sustain & Operate';
+    else if (totalMins < 22*60+30) phase = '🌙 Return & Restore';
+    else                           phase = '🌙 Rest, Warrior';
+    document.getElementById('current-phase').textContent = phase;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Mantras
+  const mantras = [
+    '"Discipline is the bridge between goals and accomplishment."',
+    '"Suffer the pain of discipline or suffer the pain of regret."',
+    '"Your future self is watching. Make him proud."',
+    '"The morning is a door. Discipline is the key."',
+    '"Stillness is where clarity is born."',
+    '"A focused mind is more powerful than any circumstance."',
+    '"Every distraction is a debt your future self must repay."'
+  ];
+  document.getElementById('mantra-text').textContent = mantras[Math.floor(Math.random() * mantras.length)];
+
+  // Toggle tasks
+  function toggle(el) {
+    el.classList.toggle('done');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const all = document.querySelectorAll('.task');
+    const done = document.querySelectorAll('.task.done');
+    const pct = Math.round((done.length / all.length) * 100);
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('bar-fill').style.width = pct + '%';
+  }
+
+  function resetAll() {
+    document.querySelectorAll('.task.done').forEach(t => t.classList.remove('done'));
+    updateProgress();
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
